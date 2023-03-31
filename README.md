@@ -8,10 +8,10 @@ Basic discord bot created with love
 To run the discord bot you need to specify these variables :
 
 ```
-token = ""    *Discord bot token*
-host=""       *Database host*
-user=""       *Datatbase user*
-password=""    *Database password*
-database=""   *Name of your database
-superadmin = [] *UID discord of superadmins
+token = ""    #Discord bot token
+host=""       #Database host
+user=""       #Database user
+password=""    #Database password
+database=""   #Name of your database
+superadmin = [] #UID discord of superadmins
 ```
