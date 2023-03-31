@@ -1,3 +1,5 @@
+import os
+
 import pymysql as MySQLdb
 import discord
 from discord.ext import commands
@@ -6,16 +8,17 @@ import asyncio
 import random
 from youtube_search import YoutubeSearch
 from discord.utils import get
-import config  #files with login infos
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 
 
 #Import des informations de connexions
-token = config.token
-host = config.host
-username = config.user
-password = config.password
-db2 = config.database
-superadmin = config.superadmin   # Les supersadmins sont écris en dur dans le code pour être certain d'avoir toujours tous les droits.
+token = os.environ['TOKEN']
+host = os.environ['HOST']
+username = os.environ['USER']
+password = os.environ['PASSWORD']
+db2 = os.environ['DATABASE']
+superadmin = os.environ['SUPERADMIN']   # Les supersadmins sont écris en dur dans le code pour être certain d'avoir toujours tous les droits.
 
 
 # Connexion du BOT :
