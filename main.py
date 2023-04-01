@@ -3,7 +3,7 @@ import pymysql as MySQLdb
 import discord
 from discord.ext import commands
 from discord.utils import get
-import yt_dlp
+from pytube import YouTube
 import asyncio
 import random
 from youtube_search import YoutubeSearch
@@ -32,6 +32,90 @@ help_command = commands.DefaultHelpCommand(no_category = 'Commands')
 async def on_ready():
     print(f"Connecté en tant que {client.user} ! ")
 
+    conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
+    cursor = conn.cursor()
+    query = "SELECT uid FROM servers"
+    cursor.execute(query)
+    tab_sever_info = cursor.fetchall()
+    query = "SELECT * FROM members";
+    cursor.execute(query)
+    tab_users_info = cursor.fetchall()
+    conn.close()
+
+
+
+
+    compteur = 0
+
+    first_fetch = True
+
+    while True:
+        # récupérer tous les noms de serveurs
+        servers = client.guilds
+        server_info = [(server.id,server.name) for server in servers]
+
+        print("Noms des serveurs :", server_info)
+
+        if len(tab_sever_info) != len(server_info):
+            for server in server_info:
+
+                if server[1] not in tab_sever_info:
+                    conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
+                    cursor = conn.cursor()
+                    query = "INSERT INTO servers VALUES(%s, %s)"
+                    cursor.execute(query, server)
+                    conn.commit()
+                    conn.close()
+
+
+        # récupérer tous les membres de tous les serveurs
+
+        all_members = []
+        if len(all_members) != len(tab_users_info) or first_fetch==True:
+            for server in servers:
+                async for member in server.fetch_members():
+                    user = (member.id,server.id)
+                    if user not in tab_users_info:
+                        conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
+                        cursor = conn.cursor()
+                        try:
+                            query1 = "INSERT INTO users VALUES (%s,%s)"
+                            cursor.execute(query1, (member.id, member.name))
+                        except:
+                            print("Utilisateur déjà existant")
+
+                        #Pour la 2e pas besoin de try catch car si c'était le cas on ne serait pas dans cette boucle ( voir le if )
+                        query2 = "INSERT INTO members VALUES (%s,%s)"
+                        cursor.execute(query2, (member.id, server.id))
+
+                        conn.commit()
+                    all_members.append((member.id, server.id))
+            first_fetch = False
+
+
+
+
+        # attendre une minute avant de récupérer à nouveau les noms et les membres des serveurs
+
+        if compteur<10:
+            compteur+=1
+        else:
+            conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
+            cursor = conn.cursor()
+            query = "SELECT uid FROM servers"
+            cursor.execute(query)
+            tab_sever_info = cursor.fetchall()
+            conn.close()
+
+        conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
+        cursor = conn.cursor()
+        query = "SELECT * FROM members";
+        cursor.execute(query)
+        tab_users_info = cursor.fetchall()
+        conn.close()
+
+        await asyncio.sleep(60)
+
 
 
 
@@ -39,33 +123,25 @@ async def on_ready():
 
 # BOT MUSIQUE DEPUIS YOUTUBE
 #========================================================================================================================================================#
-ydl_opts = {
-    'format': 'beataudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '192'
-    }]
-}
-ytdl = yt_dlp.YoutubeDL(ydl_opts)
-
-
 
 musics = {}
 
+
 class Video:
     def __init__(self, url):
-        self.video = ytdl.extract_info(url, download=False)
-        self.video_format = self.video["formats"][0]
-        self.url = self.video["webpage_url"]
-        self.stream_url = self.video_format["url"]
+        self.url = url
+        self.video = YouTube(url)
+        self.stream = self.video.streams.filter(only_audio=True).order_by('abr').desc().first()
         self.repeat = 0
 
+    @property
+    def stream_url(self):
+        return self.stream.url
 
-def play_song(clientg,queue ,song):
-    source = discord.PCMVolumeTransformer(
-        discord.FFmpegPCMAudio(song.stream_url, executable="./ffmpeg/bin/ffmpeg.exe", before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5")
-    )
+
+def play_song(clientg, queue, song):
+    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song.stream_url, executable="./ffmpeg/bin/ffmpeg.exe", before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"))
+
 
     def next(_):
         if len(queue) > 0:
@@ -100,6 +176,7 @@ async def play(ctx, *args):
         url_suffix = yt[0]['url_suffix']
         url = "https://www.youtube.com"+url_suffix
         verif_music = 1
+
 
 
     if clientg and clientg.channel:
