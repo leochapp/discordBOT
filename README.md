@@ -21,3 +21,8 @@ SUPERADMIN = [] #UID discord of superadmins
 ### 2. The next step is to install FFMPEG and <ins> place it in the working directory </ins>
 
 Here is the link where you can download FFMPEG  : https://ffmpeg.org/download.html
+
+
+### 3. Run the BOT
+
+To run the discordbot just type : python main.py in the console, or in your terminal.
