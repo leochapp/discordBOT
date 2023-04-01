@@ -83,21 +83,28 @@ def add_music_palyed(url, userid, server):
     conn.close()
 
 
-def getdata(role, serv):
+def verifyrole(role, user_id, server_id):
+    parameters = (server_id, role, user_id)
     if role == "admin":
-        role = "isadmin"
+        query = f"SELECT COUNT(*) FROM tools WHERE server_id = %s AND isadmin = %s AND user_id = %s"
     else:
-        role = "istarget"
-
+        query = f"SELECT COUNT(*) FROM tools WHERE server_id = %s AND istarget = %s AND user_id = %s"
     db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
     cursor = db.cursor()
-    parameters = (serv, role)
-    query = f"SELECT user_id FROM tools WHERE server_id = %s AND {role} = 1"
     cursor.execute(query, parameters)
-    tab = cursor.fetchall()
-    data = []
-    for tup in tab:
-        data.append(tup[0])
+    result = cursor.fetchone()[0]
     db.close()
-    print(data)
-    return data
+    if result == 1:
+        return True
+    else:
+        return False
+
+
+def get_last_url(server_id):
+    db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
+    cursor = db.cursor()
+    parameters = (server_id,)
+    query = "SELECT url FROM datamusic WHERE server_id=%s ORDER BY date_time DESC LIMIT 1;"
+    cursor.execute(query, parameters)
+    url = cursor.fetchone()[0]
+    return url
