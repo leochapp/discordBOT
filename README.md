@@ -5,13 +5,17 @@ Basic discord bot created with love
 
 ## Get started
 
-To run the discord bot you need to specify these variables :
+### 1. To run the discord bot you need to specify these variables in the .env conf :
 
 ```
-token = ""    #Discord bot token
-host=""       #Database host
-user=""       #Database user
-password=""    #Database password
-database=""   #Name of your database
-superadmin = [] #UID discord of superadmins
+TOKEN = ""    #Discord bot token
+HOST=""       #Database host
+USER=""       #Database user
+PASSWORD=""    #Database password
+DATABASE=""   #Name of your database
+SUPERADMIN = [] #UID discord of superadmins
 ```
+
+### 2. The next step is to install FFMPEG and <b> place it in the working directory </b>
+
+Here is the link where you can download FFMPEG  : (https://ffmpeg.org/download.html)
