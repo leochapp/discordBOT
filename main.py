@@ -1,19 +1,18 @@
-from music import *
-from db import *
-import os
+from commands.music import *
 
 load_dotenv(find_dotenv())
 
-#Import des informations de connexions
+# Import des informations de connexions
 token = os.environ['TOKEN']
-
 
 # Connexion du BOT :
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix='.', intents=intents, description="Bot cool fait entre pote avec amour et tendresse")
+client = commands.Bot(command_prefix='.', intents=intents,
+                      description="Bot cool fait entre pote avec amour et tendresse")
 intents.members = True
 intents.message_content = True
-help_command = commands.DefaultHelpCommand(no_category = 'Commands')
+help_command = commands.DefaultHelpCommand(no_category='Commands')
+
 
 @client.event
 async def on_ready():
@@ -30,7 +29,7 @@ async def on_ready():
     while True:
         # récupérer tous les noms de serveurs
         servers = client.guilds
-        server_info = [(server.id,server.name) for server in servers]
+        server_info = [(server.id, server.name) for server in servers]
         if len(tab_server_info) != len(server_info):
             for server in server_info:
 
@@ -38,23 +37,26 @@ async def on_ready():
                     add_server(server)
 
         # récupérer tous les membres de tous les serveurs
-
-        all_members = []
-
-
-        if len(all_members) != len(tab_users_info) or first_fetch==True:
+        if first_fetch == True:
+            all_members = []
             for server in servers:
                 async for member in server.fetch_members():
-                    user = (member.id,server.id)
-                    if user not in tab_users_info:
-                        add_user(member)
-                    all_members.append((member.id, server.id))
+                     user = (member.id, server.id)
+                     if user not in tab_users_info:
+                          add_user(user, member.name)
+                     all_members.append((member.id, server.id))
             first_fetch = False
+
+        members_not_added = [user for user in all_members if user not in tab_users_info]
+        for user in members_not_added:
+            member = await client.fetch_user(user[0])
+            username = member.name
+            add_user(user, username)
 
         # attendre une minute avant de récupérer à nouveau les noms et les membres des serveurs
 
-        if compteur<10:
-            compteur+=1
+        if compteur < 10:
+            compteur += 1
         else:
             tab_server_info = update_server_info()
 
@@ -69,10 +71,12 @@ async def setup():
     await client.wait_until_ready()
     await client.add_cog(MusicBOT(client))
 
+
 async def main():
     await asyncio.gather(
         client.start(token),
         setup(),
     )
+
 
 asyncio.run(main())
