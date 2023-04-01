@@ -1,14 +1,17 @@
 import asyncio
 import random
-
+import re
 import discord
 from discord.ext import commands
 from pytube import YouTube
 from youtube_search import YoutubeSearch
 from db import *
 
-superadmin = os.environ['SUPERADMIN']
-
+try:
+    superadmin = os.environ.get('SUPERADMIN').split(',')
+    superadmin = [int(x) for x in superadmin]
+except:
+    superadmin = []
 
 class Video:
     def __init__(self, url):
@@ -106,23 +109,25 @@ class MusicBOT(commands.Cog):
         clientg = ctx.guild.voice_client
         if not clientg.is_paused():
             clientg.pause()
+            await ctx.send(f"The music is now paused ")
 
     @commands.command()
     async def resume(self, ctx):
         clientg = ctx.guild.voice_client
         if clientg.is_paused():
             clientg.resume()
+            await ctx.send(f"The music has resumed ")
 
     @commands.command()
     async def r(self, ctx):
         await self.resume(ctx)
+        await ctx.send(f"The music has resumed ")
 
     @commands.command()
     async def clear(self, ctx):
-        server = ctx.message.guild.name
-        admins_uid = getdata(1, 'admins', server)
+        server = ctx.message.guild.id
         uid = ctx.message.author.id
-        if (uid in admins_uid) or (uid in superadmin):
+        if verifyrole('admin', uid, server) or (uid in superadmin):
             self.musics[ctx.guild].clear()
             await ctx.message.add_reaction('✅')
         else:
@@ -169,7 +174,6 @@ class MusicBOT(commands.Cog):
                 description="No song in the queue",
                 color=discord.Color.blue())
             embed.set_author(name=ctx.author.display_name, icon_url=ctx.message.author.avatar)
-            embed.set_thumbnail(url="https://lchappuis.fr/chien.jpg")
             embed.set_footer(text="La biz de Léo")
 
         await ctx.send(embed=embed)
@@ -181,14 +185,12 @@ class MusicBOT(commands.Cog):
     @commands.command()
     async def disconnect(self, ctx):
         bot = ctx.voice_client
-        server = ctx.message.guild.id
         bot_channel = bot.channel
         user_channel = ctx.author.voice.channel
+        server = ctx.message.guild.id
         uid = ctx.message.author.id
 
-        print(getdata('admin', server), superadmin)
-
-        if (uid in getdata('admin', server)) or (uid in superadmin):
+        if verifyrole('admin', uid, server) or (uid in superadmin):
             await bot.disconnect()
             self.musics[ctx.guild] = []
             await ctx.message.add_reaction('✅')
@@ -208,37 +210,47 @@ class MusicBOT(commands.Cog):
     async def quit(self, ctx):
         await self.disconnect(ctx)
 
-# il faut écrire la partie db pour la commande last
+    @commands.command()
+    async def last(self, ctx):
 
-# @client.command()
-# async def last(ctx):
-#     clientg = ctx.guild.voice_client
-#     db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
-#     cursor = db.cursor()
-#
-#     server = ctx.message.guild.name
-#     parameters = (server)
-#     query = "SELECT link FROM datamusic WHERE id = (SELECT MAX(id) FROM datamusic WHERE server=%s)"
-#
-#     cursor.execute(query, parameters)
-#     url = cursor.fetchone()[0]
+        clientg = ctx.guild.voice_client
+        server = ctx.message.guild.id
+        url = get_last_url(server)
 
+        if clientg and clientg.channel:
+            video = Video(url)
+            self.musics[ctx.guild].append(video)
+            await ctx.message.add_reaction('✅')
+        else:
+            # Si connecté à un channel.
+            channel = ctx.author.voice.channel
 
-# if clientg and clientg.channel:
-#     video = Video(url)
-#     musics[ctx.guild].append(video)
-#     await ctx.message.add_reaction('✅')
-# else:
-#     # Si connecté à un channel.
-#     channel = ctx.author.voice.channel
-#
-#     video = Video(url)
-#     musics[ctx.guild] = []
-#
-#     clientg = await channel.connect()
-#     play_song(clientg, musics[ctx.guild], video)
-#
-#     emojis = '✅'
-#     await ctx.message.add_reaction(emojis)
-#     await ctx.send(f"La musique lancée est {url} ")
-# db.close()
+            video = Video(url)
+            self.musics[ctx.guild] = []
+
+            clientg = await channel.connect()
+            self.play_song(clientg, self.musics[ctx.guild], video)
+
+            emojis = '✅'
+            await ctx.message.add_reaction(emojis)
+            await ctx.send(f"La musique lancée est {url} ")
+
+    @commands.command()
+    async def remove(self, ctx, *args):
+        server = ctx.message.guild.id
+        uid = ctx.message.author.id
+        id_music = int(args[0])
+
+        if verifyrole('admin', uid, server) or (uid in superadmin):
+            self.musics[ctx.guild].pop(id_music - 1)
+            await ctx.message.add_reaction('✅')
+        else:
+            if ctx.author.voice.channel == ctx.voice_client.channel:
+                self.musics[ctx.guild].pop(id_music - 1)
+                await ctx.message.add_reaction('✅')
+            else:
+                await ctx.send('You have to be connected to the same voice channel to disconnect the BOT.\n Gros PD')
+
+    @commands.command()
+    async def rm(self, ctx, *args):
+        await self.remove(ctx, *args)
