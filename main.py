@@ -3,11 +3,11 @@ import os
 import pymysql as MySQLdb
 import discord
 from discord.ext import commands
-import youtube_dl
+from discord.utils import get
+import yt_dlp
 import asyncio
 import random
 from youtube_search import YoutubeSearch
-from discord.utils import get
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
@@ -48,7 +48,7 @@ ydl_opts = {
         'preferredquality': '192'
     }]
 }
-ytdl = youtube_dl.YoutubeDL(ydl_opts)
+ytdl = yt_dlp.YoutubeDL(ydl_opts)
 
 
 
