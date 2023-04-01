@@ -1,10 +1,11 @@
 import asyncio
 import random
+
 import discord
 from discord.ext import commands
+from pytube import YouTube
 from youtube_search import YoutubeSearch
 from db import *
-from pytube import YouTube
 
 superadmin = os.environ['SUPERADMIN']
 
@@ -87,7 +88,7 @@ class MusicBOT(commands.Cog):
         clientg.play(source, after=next)
 
     @commands.command()
-    async def p(self,ctx, *args):
+    async def p(self, ctx, *args):
         await self.play(ctx, *args)
 
     @commands.command()
@@ -97,7 +98,7 @@ class MusicBOT(commands.Cog):
         await ctx.message.add_reaction('✅')
 
     @commands.command()
-    async def s(self,ctx):
+    async def s(self, ctx):
         await self.skip(ctx)
 
     @commands.command()
@@ -106,22 +107,20 @@ class MusicBOT(commands.Cog):
         if not clientg.is_paused():
             clientg.pause()
 
-
     @commands.command()
-    async def resume(self,ctx):
+    async def resume(self, ctx):
         clientg = ctx.guild.voice_client
         if clientg.is_paused():
             clientg.resume()
 
     @commands.command()
-    async def r(self,ctx):
+    async def r(self, ctx):
         await self.resume(ctx)
 
-
     @commands.command()
-    async def clear(self,ctx):
+    async def clear(self, ctx):
         server = ctx.message.guild.name
-        admins_uid = getdata(1,'admins',server)
+        admins_uid = getdata(1, 'admins', server)
         uid = ctx.message.author.id
         if (uid in admins_uid) or (uid in superadmin):
             self.musics[ctx.guild].clear()
@@ -134,7 +133,7 @@ class MusicBOT(commands.Cog):
                 await ctx.send('You have to be connected to the same voice channel to disconnect the BOT.\n Gros PD')
 
     @commands.command()
-    async def queue(self,ctx):
+    async def queue(self, ctx):
 
         if len(self.musics[ctx.guild]) > 0:
 
@@ -151,7 +150,6 @@ class MusicBOT(commands.Cog):
             thbnail = yt[0]['thumbnails'][0]
             embed.set_thumbnail(url=thbnail)
 
-
             i = 1
             for video in self.musics[ctx.guild]:
                 url = video.url
@@ -161,7 +159,7 @@ class MusicBOT(commands.Cog):
                 publish = yt[0]['publish_time']
                 duration = yt[0]['duration']
                 embed.add_field(name=f"**{i}**", value=f"**{title}** - {duration} | {channel}  {url}", inline=False)
-                i+=1
+                i += 1
 
             embed.set_footer(text="La biz de Léo")
         else:
@@ -174,16 +172,14 @@ class MusicBOT(commands.Cog):
             embed.set_thumbnail(url="https://lchappuis.fr/chien.jpg")
             embed.set_footer(text="La biz de Léo")
 
-
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def q(self,ctx):
+    async def q(self, ctx):
         await self.queue(ctx)
 
-
     @commands.command()
-    async def disconnect(self,ctx):
+    async def disconnect(self, ctx):
         bot = ctx.voice_client
         server = ctx.message.guild.id
         bot_channel = bot.channel
@@ -205,13 +201,12 @@ class MusicBOT(commands.Cog):
                 await ctx.send('You have to be connected to the same voice channel to disconnect the BOT .\n Ptit PD')
 
     @commands.command()
-    async def d(self,ctx):
+    async def d(self, ctx):
         await self.disconnect(ctx)
 
     @commands.command()
-    async def quit(self,ctx):
+    async def quit(self, ctx):
         await self.disconnect(ctx)
-
 
 # il faut écrire la partie db pour la commande last
 
@@ -229,25 +224,21 @@ class MusicBOT(commands.Cog):
 #     url = cursor.fetchone()[0]
 
 
-    # if clientg and clientg.channel:
-    #     video = Video(url)
-    #     musics[ctx.guild].append(video)
-    #     await ctx.message.add_reaction('✅')
-    # else:
-    #     # Si connecté à un channel.
-    #     channel = ctx.author.voice.channel
-    #
-    #     video = Video(url)
-    #     musics[ctx.guild] = []
-    #
-    #     clientg = await channel.connect()
-    #     play_song(clientg, musics[ctx.guild], video)
-    #
-    #     emojis = '✅'
-    #     await ctx.message.add_reaction(emojis)
-    #     await ctx.send(f"La musique lancée est {url} ")
-    # db.close()
-
-
-
-
+# if clientg and clientg.channel:
+#     video = Video(url)
+#     musics[ctx.guild].append(video)
+#     await ctx.message.add_reaction('✅')
+# else:
+#     # Si connecté à un channel.
+#     channel = ctx.author.voice.channel
+#
+#     video = Video(url)
+#     musics[ctx.guild] = []
+#
+#     clientg = await channel.connect()
+#     play_song(clientg, musics[ctx.guild], video)
+#
+#     emojis = '✅'
+#     await ctx.message.add_reaction(emojis)
+#     await ctx.send(f"La musique lancée est {url} ")
+# db.close()

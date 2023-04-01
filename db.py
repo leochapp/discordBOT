@@ -1,9 +1,7 @@
+import datetime
 import os
 import pymysql as MySQLdb
 from dotenv import load_dotenv, find_dotenv
-import datetime
-
-
 
 load_dotenv(find_dotenv())
 
@@ -11,6 +9,7 @@ host = os.environ['HOST']
 username = os.environ['USER']
 password = os.environ['PASSWORD']
 db2 = os.environ['DATABASE']
+
 
 def get_server_info():
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
@@ -24,6 +23,7 @@ def get_server_info():
     conn.close()
     return tab_sever_info, tab_users_info
 
+
 def add_server(server):
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
     cursor = conn.cursor()
@@ -32,7 +32,8 @@ def add_server(server):
     conn.commit()
     conn.close()
 
-def add_user(member):
+
+def add_user(user, name):
     my_datetime = datetime.datetime.now()
     current_datetime = my_datetime.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -40,13 +41,14 @@ def add_user(member):
     cursor = conn.cursor()
     try:
         query1 = "INSERT INTO users VALUES (%s,%s)"
-        cursor.execute(query1, (member.id, member.name))
+        cursor.execute(query1, (user[0], name))
     except:
-        print("utilisateur déjà ajouté")
+        pass
     query2 = "INSERT INTO members VALUES (%s,%s, %s)"
-    cursor.execute(query2, (member.id, member.server.id, current_datetime))
+    cursor.execute(query2, (user[0], user[1], current_datetime))
     conn.commit()
     conn.close()
+
 
 def update_users_info():
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
@@ -57,6 +59,7 @@ def update_users_info():
     conn.close()
     return tab_users_info
 
+
 def update_server_info():
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
     cursor = conn.cursor()
@@ -66,8 +69,8 @@ def update_server_info():
     conn.close()
     return tab_sever_info
 
-def add_music_palyed(url, userid, server):
 
+def add_music_palyed(url, userid, server):
     my_datetime = datetime.datetime.now()
     current_datetime = my_datetime.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -79,9 +82,9 @@ def add_music_palyed(url, userid, server):
     conn.commit()
     conn.close()
 
-def getdata(role,serv):
 
-    if role =="admin":
+def getdata(role, serv):
+    if role == "admin":
         role = "isadmin"
     else:
         role = "istarget"
