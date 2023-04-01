@@ -16,6 +16,6 @@ DATABASE=""   #Name of your database
 SUPERADMIN = [] #UID discord of superadmins
 ```
 
-### 2. The next step is to install FFMPEG and <u> place it in the working directory </u>
+### 2. The next step is to install FFMPEG and <ins> place it in the working directory </ins>
 
 Here is the link where you can download FFMPEG  : (https://ffmpeg.org/download.html)
