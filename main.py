@@ -1,5 +1,4 @@
 import os
-
 import pymysql as MySQLdb
 import discord
 from discord.ext import commands
@@ -65,7 +64,7 @@ class Video:
 
 def play_song(clientg,queue ,song):
     source = discord.PCMVolumeTransformer(
-        discord.FFmpegPCMAudio(song.stream_url, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5")
+        discord.FFmpegPCMAudio(song.stream_url, executable="./ffmpeg/bin/ffmpeg.exe", before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5")
     )
 
     def next(_):
@@ -128,17 +127,11 @@ async def play(ctx, *args):
         if verif_music == 1:
             await ctx.send(f"La musique lancée est {url} ")
 
-    db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
-    cursor = db.cursor()
+
 
     user = get(client.get_all_members(), id= ctx.message.author.id)
     server = ctx.message.guild.name
-    parameters = (None,url,user,server)
-    query = "INSERT INTO datamusic VALUES(%s,%s,%s,%s)"
 
-    cursor.execute(query, parameters)
-    db.commit()
-    db.close()
 
 
 
@@ -241,42 +234,43 @@ async def queue(ctx):
     await ctx.send(embed=embed)
 
 
-@client.command()
-async def last(ctx):
-    clientg = ctx.guild.voice_client
-    db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
-    cursor = db.cursor()
 
-    server = ctx.message.guild.name
-    parameters = (server)
-    query = "SELECT link FROM datamusic WHERE id = (SELECT MAX(id) FROM datamusic WHERE server=%s)"
+# il faut écrire la partie db pour la commande last
 
-    cursor.execute(query, parameters)
-    url = cursor.fetchone()[0]
-
-
-    if clientg and clientg.channel:
-        video = Video(url)
-        musics[ctx.guild].append(video)
-        await ctx.message.add_reaction('✅')
-    else:
-        # Si connecté à un channel.
-        channel = ctx.author.voice.channel
-
-        video = Video(url)
-        musics[ctx.guild] = []
-
-        clientg = await channel.connect()
-        play_song(clientg, musics[ctx.guild], video)
-
-        emojis = '✅'
-        await ctx.message.add_reaction(emojis)
-        await ctx.send(f"La musique lancée est {url} ")
+# @client.command()
+# async def last(ctx):
+#     clientg = ctx.guild.voice_client
+#     db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
+#     cursor = db.cursor()
+#
+#     server = ctx.message.guild.name
+#     parameters = (server)
+#     query = "SELECT link FROM datamusic WHERE id = (SELECT MAX(id) FROM datamusic WHERE server=%s)"
+#
+#     cursor.execute(query, parameters)
+#     url = cursor.fetchone()[0]
 
 
+    # if clientg and clientg.channel:
+    #     video = Video(url)
+    #     musics[ctx.guild].append(video)
+    #     await ctx.message.add_reaction('✅')
+    # else:
+    #     # Si connecté à un channel.
+    #     channel = ctx.author.voice.channel
+    #
+    #     video = Video(url)
+    #     musics[ctx.guild] = []
+    #
+    #     clientg = await channel.connect()
+    #     play_song(clientg, musics[ctx.guild], video)
+    #
+    #     emojis = '✅'
+    #     await ctx.message.add_reaction(emojis)
+    #     await ctx.send(f"La musique lancée est {url} ")
+    # db.close()
 
 
-    db.close()
 
 @client.command()
 async def p(ctx, *args):
@@ -327,30 +321,30 @@ def getdata(table,serv, active):
 
 # Fonctions qui servaient à lire les phrases du BOT troll
 
-def readphrases():
-    db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
-    cursor = db.cursor()
-    query = "SELECT phrase.value FROM phrase;"
-    cursor.execute(query)
-    tab = cursor.fetchall()
-    data = []
-    for tup in tab:
-        data.append(tup[0])
-    db.close()
-    return data
-
-
-def readphraseshard():
-    db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
-    cursor = db.cursor()
-    query = "SELECT phrasehard.value FROM phrasehard;"
-    cursor.execute(query)
-    tab = cursor.fetchall()
-    data = []
-    for tup in tab:
-        data.append(tup[0])
-    db.close()
-    return data
+# def readphrases():
+#     db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
+#     cursor = db.cursor()
+#     query = "SELECT phrase.value FROM phrase;"
+#     cursor.execute(query)
+#     tab = cursor.fetchall()
+#     data = []
+#     for tup in tab:
+#         data.append(tup[0])
+#     db.close()
+#     return data
+#
+#
+# def readphraseshard():
+#     db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
+#     cursor = db.cursor()
+#     query = "SELECT phrasehard.value FROM phrasehard;"
+#     cursor.execute(query)
+#     tab = cursor.fetchall()
+#     data = []
+#     for tup in tab:
+#         data.append(tup[0])
+#     db.close()
+#     return data
 
 
 
