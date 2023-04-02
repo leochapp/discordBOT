@@ -23,7 +23,6 @@ def get_server_info():
     conn.close()
     return tab_sever_info, tab_users_info
 
-
 def add_server(server):
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
     cursor = conn.cursor()
@@ -31,7 +30,6 @@ def add_server(server):
     cursor.execute(query, server)
     conn.commit()
     conn.close()
-
 
 def add_user(user, name):
     my_datetime = datetime.datetime.now()
@@ -49,7 +47,6 @@ def add_user(user, name):
     conn.commit()
     conn.close()
 
-
 def update_users_info():
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
     cursor = conn.cursor()
@@ -59,7 +56,6 @@ def update_users_info():
     conn.close()
     return tab_users_info
 
-
 def update_server_info():
     conn = MySQLdb.connect(host=host, database=db2, user=username, password=password)
     cursor = conn.cursor()
@@ -68,7 +64,6 @@ def update_server_info():
     tab_sever_info = cursor.fetchall()
     conn.close()
     return tab_sever_info
-
 
 def add_music_palyed(url, userid, server):
     my_datetime = datetime.datetime.now()
@@ -81,7 +76,6 @@ def add_music_palyed(url, userid, server):
     cursor.execute(query, values)
     conn.commit()
     conn.close()
-
 
 def verifyrole(role, user_id, server_id):
     parameters = (server_id, role, user_id)
@@ -98,7 +92,6 @@ def verifyrole(role, user_id, server_id):
         return True
     else:
         return False
-
 
 def get_last_url(server_id):
     db = MySQLdb.connect(host=host, user=username, password=password, database=db2)
