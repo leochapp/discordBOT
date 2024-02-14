@@ -64,7 +64,7 @@ class MusicBOT(commands.Cog):
             emojis = ['✅', '👍', '🍆']
             nb2 = random.randint(1, 3) - 1
             if nbrandom == 9:
-                await ctx.send(f"Musique de PD lancée pour {ctx.message.author.mention}")
+                await ctx.send(f"Musique de *** lancée pour {ctx.message.author.mention}")
             else:
                 await ctx.message.add_reaction(emojis[nb2])
 
