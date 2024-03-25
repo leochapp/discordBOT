@@ -1,6 +1,6 @@
 # discordBOT
 
-Basic discord bot created with love
+Warning, this repo needs to be updated 
 
 ## Get started
 
